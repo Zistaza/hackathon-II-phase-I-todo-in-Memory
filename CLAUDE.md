@@ -208,3 +208,10 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Active Technologies
+- Python 3.13+ (as per constitution) + None (no external frameworks allowed per constitution) (001-todo-intermediate-features)
+- In-memory only (no files, no database as per constitution) (001-todo-intermediate-features)
+
+## Recent Changes
+- 001-todo-intermediate-features: Added Python 3.13+ (as per constitution) + None (no external frameworks allowed per constitution)
