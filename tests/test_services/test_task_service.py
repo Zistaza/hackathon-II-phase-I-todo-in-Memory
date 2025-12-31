@@ -22,6 +22,8 @@ class TestTaskService:
         assert task.title == "Test Task"
         assert task.description is None
         assert task.completed is False
+        assert task.priority == "medium"  # Default priority
+        assert task.tags == []  # Default tags
         assert len(service.get_all_tasks()) == 1
 
     def test_add_task_with_title_and_description(self):
@@ -33,6 +35,21 @@ class TestTaskService:
         assert task.title == "Test Task"
         assert task.description == "Test Description"
         assert task.completed is False
+        assert task.priority == "medium"  # Default priority
+        assert task.tags == []  # Default tags
+        assert len(service.get_all_tasks()) == 1
+
+    def test_add_task_with_priority_and_tags(self):
+        """Test adding a task with priority and tags."""
+        service = TaskService()
+        task = service.add_task("Test Task", "Test Description", "high", ["work", "urgent"])
+
+        assert task.id == 1
+        assert task.title == "Test Task"
+        assert task.description == "Test Description"
+        assert task.completed is False
+        assert task.priority == "high"
+        assert set(task.tags) == {"work", "urgent"}
         assert len(service.get_all_tasks()) == 1
 
     def test_add_task_generates_sequential_ids(self):
@@ -68,6 +85,27 @@ class TestTaskService:
         with pytest.raises(TaskValidationError) as exc_info:
             service.add_task("Test Task", long_description)
         assert "exceeds 500 character limit" in str(exc_info.value)
+
+    def test_add_task_fails_with_invalid_priority(self):
+        """Test that adding a task with invalid priority raises TaskValidationError."""
+        service = TaskService()
+        with pytest.raises(TaskValidationError) as exc_info:
+            service.add_task("Test Task", priority="invalid")
+        assert "Priority must be one of: high, medium, low" in str(exc_info.value)
+
+    def test_add_task_fails_with_invalid_tags(self):
+        """Test that adding a task with invalid tags raises TaskValidationError."""
+        service = TaskService()
+
+        # Test empty tag
+        with pytest.raises(TaskValidationError) as exc_info:
+            service.add_task("Test Task", tags=["", "valid"])
+        assert "Tag cannot be empty" in str(exc_info.value)
+
+        # Test tag with spaces
+        with pytest.raises(TaskValidationError) as exc_info:
+            service.add_task("Test Task", tags=["valid", "with spaces"])
+        assert "Tag cannot contain spaces" in str(exc_info.value)
 
     def test_get_all_tasks_returns_all_tasks(self):
         """Test that get_all_tasks returns all tasks."""
@@ -126,6 +164,8 @@ class TestTaskService:
         assert updated_task.id == 1
         assert updated_task.title == "New Title"
         assert updated_task.description is None
+        assert updated_task.priority == "medium"  # Should keep default priority
+        assert updated_task.tags == []  # Should keep default tags
 
     def test_update_task_updates_description(self):
         """Test updating task description."""
@@ -138,16 +178,46 @@ class TestTaskService:
         assert updated_task.title == "Title"
         assert updated_task.description == "New Description"
 
-    def test_update_task_updates_both_title_and_description(self):
-        """Test updating both title and description."""
+    def test_update_task_updates_priority(self):
+        """Test updating task priority."""
         service = TaskService()
-        original_task = service.add_task("Original Title", "Original Description")
+        original_task = service.add_task("Title", priority="low")
 
-        updated_task = service.update_task(1, title="New Title", description="New Description")
+        updated_task = service.update_task(1, priority="high")
+
+        assert updated_task.id == 1
+        assert updated_task.title == "Title"
+        assert updated_task.priority == "high"
+
+    def test_update_task_updates_tags(self):
+        """Test updating task tags."""
+        service = TaskService()
+        original_task = service.add_task("Title", tags=["old"])
+
+        updated_task = service.update_task(1, tags=["new", "tags"])
+
+        assert updated_task.id == 1
+        assert updated_task.title == "Title"
+        assert set(updated_task.tags) == {"new", "tags"}
+
+    def test_update_task_updates_all_fields(self):
+        """Test updating all task fields at once."""
+        service = TaskService()
+        original_task = service.add_task("Old Title", "Old Description", "low", ["old", "tags"])
+
+        updated_task = service.update_task(
+            1,
+            title="New Title",
+            description="New Description",
+            priority="high",
+            tags=["new", "tags"]
+        )
 
         assert updated_task.id == 1
         assert updated_task.title == "New Title"
         assert updated_task.description == "New Description"
+        assert updated_task.priority == "high"
+        assert set(updated_task.tags) == {"new", "tags"}
 
     def test_update_task_fails_with_invalid_id(self):
         """Test that updating task with invalid ID raises TaskNotFoundError."""
@@ -176,6 +246,30 @@ class TestTaskService:
         with pytest.raises(TaskValidationError) as exc_info:
             service.update_task(1, title=long_title)
         assert "exceeds 100 character limit" in str(exc_info.value)
+
+    def test_update_task_fails_with_invalid_priority(self):
+        """Test that updating task with invalid priority raises TaskValidationError."""
+        service = TaskService()
+        service.add_task("Task 1")
+
+        with pytest.raises(TaskValidationError) as exc_info:
+            service.update_task(1, priority="invalid")
+        assert "Priority must be one of: high, medium, low" in str(exc_info.value)
+
+    def test_update_task_fails_with_invalid_tags(self):
+        """Test that updating task with invalid tags raises TaskValidationError."""
+        service = TaskService()
+        service.add_task("Task 1")
+
+        # Test empty tag
+        with pytest.raises(TaskValidationError) as exc_info:
+            service.update_task(1, tags=["", "valid"])
+        assert "Tag cannot be empty" in str(exc_info.value)
+
+        # Test tag with spaces
+        with pytest.raises(TaskValidationError) as exc_info:
+            service.update_task(1, tags=["valid", "with spaces"])
+        assert "Tag cannot contain spaces" in str(exc_info.value)
 
     def test_delete_task_removes_task(self):
         """Test that delete_task removes the task."""

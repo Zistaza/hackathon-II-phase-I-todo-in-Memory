@@ -1,15 +1,13 @@
 <!-- Sync Impact Report:
-Version change: N/A (initial version) → 1.0.0
-List of modified principles: N/A (initial creation)
-Added sections: All principles and sections based on user requirements
+Version change: 1.0.0 → 1.1.0
+List of modified principles: N/A (feature level additions)
+Added sections: Feature Progression Levels (Basic, Intermediate, Advanced)
 Removed sections: N/A
 Templates requiring updates:
-- ✅ .specify/templates/plan-template.md: Constitution Check section should reference spec-first development and clean architecture principles
-- ⚠ .specify/templates/spec-template.md: May need alignment for spec-driven requirements
-- ⚠ .specify/templates/tasks-template.md: May need alignment for task organization based on principles
-Follow-up TODOs:
-- TODO(RATIFICATION_DATE): Need to set original adoption date
-- TODO(LAST_AMENDED_DATE): Update when constitution is amended
+- ⚠ .specify/templates/plan-template.md: May need alignment for new feature levels
+- ⚠ .specify/templates/spec-template.md: May need alignment for new feature levels
+- ⚠ .specify/templates/tasks-template.md: May need alignment for new feature levels
+Follow-up TODOs: None
 -->
 # In-Memory Todo CLI Application Constitution
 
@@ -58,8 +56,26 @@ The following technology standards are mandatory for this project:
 - CLI interface must be human-readable and intuitive
 - Errors must be handled gracefully with clear messages
 
+## Feature Progression Levels
+
+### Basic Level (Core Essentials)
+1. Add Task – Create new todo items
+2. Delete Task – Remove tasks from the list
+3. Update Task – Modify existing task details
+4. View Task List – Display all tasks
+5. Mark as Complete – Toggle task completion status
+
+### Intermediate Level (Organization & Usability)
+1. Priorities & Tags/Categories – Assign levels (high/medium/low) or labels (work/home)
+2. Search & Filter – Search by keyword; filter by status, priority, or date
+3. Sort Tasks – Reorder by due date, priority, or alphabetically
+
+### Advanced Level (Intelligent Features)
+1. Recurring Tasks – Auto-reschedule repeating tasks (e.g., "weekly meeting")
+2. Due Dates & Time Reminders – Set deadlines with date/time pickers; browser notifications
+
 ## Governance
 
 This constitution governs all development activities for the In-Memory Todo CLI Application. All code changes, feature implementations, and architectural decisions must comply with these principles. Deviations require explicit approval and constitution amendments.
 
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2025-12-30
+**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2025-12-31
