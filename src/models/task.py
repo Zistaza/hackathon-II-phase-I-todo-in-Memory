@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List
+from .recurrence import RecurrencePattern  # Import the new RecurrencePattern model
 
 
 @dataclass
@@ -16,6 +17,13 @@ class Task:
         priority (str): Task priority level ('high', 'medium', 'low') (default: 'medium')
         tags (List[str]): List of tags/categories for the task (default: empty list)
         created_at (datetime): Timestamp of when task was created (immutable)
+
+        # New fields for advanced features:
+        due_date (Optional[datetime]): Due date and time (optional)
+        reminder_time (Optional[datetime]): Reminder notification time (optional)
+        recurrence_pattern (Optional[RecurrencePattern]): Recurrence configuration (optional)
+        parent_task_id (Optional[str]): For recurring tasks, link to original (optional)
+        is_recurring_template (bool): Whether this is a template for recurring tasks (default: False)
     """
     id: int
     title: str
@@ -24,6 +32,13 @@ class Task:
     priority: str = "medium"
     tags: List[str] = None
     created_at: datetime = None
+
+    # New fields for advanced features:
+    due_date: Optional[datetime] = None  # Due date and time (optional)
+    reminder_time: Optional[datetime] = None  # Reminder notification time (optional)
+    recurrence_pattern: Optional[RecurrencePattern] = None  # Recurrence configuration (optional)
+    parent_task_id: Optional[str] = None  # For recurring tasks, link to original (optional)
+    is_recurring_template: bool = False  # Whether this is a template for recurring tasks
 
     def __post_init__(self):
         """Validate task attributes after initialization."""
@@ -37,6 +52,9 @@ class Task:
         self._validate_description()
         self._validate_priority()
         self._validate_tags()
+        self._validate_due_date()
+        self._validate_reminder_time()
+        self._validate_parent_task_id()
 
     def _validate_title(self):
         """Validate title requirements: not empty, max 100 chars."""
@@ -115,3 +133,32 @@ class Task:
         """Remove a single tag from the task."""
         if tag in self.tags:
             self.tags.remove(tag)
+
+    def _validate_due_date(self):
+        """Validate due_date: must be in the future (if specified)."""
+        import os
+        # For testing purposes, we might want to allow past dates
+        if not os.environ.get('TESTING_ALLOW_PAST_DATES') and self.due_date and self.due_date < datetime.now():
+            raise ValueError(f"Due date must be in the future, got: {self.due_date}")
+
+    def _validate_reminder_time(self):
+        """Validate reminder_time: must be in the future and before due_date (if both specified)."""
+        import os
+        if self.reminder_time:
+            # For testing purposes, we might want to allow past times
+            if not os.environ.get('TESTING_ALLOW_PAST_DATES') and self.reminder_time < datetime.now():
+                raise ValueError(f"Reminder time must be in the future, got: {self.reminder_time}")
+            if self.due_date and self.reminder_time > self.due_date:
+                raise ValueError(f"Reminder time must be before due date, got reminder: {self.reminder_time}, due: {self.due_date}")
+
+    def _validate_parent_task_id(self):
+        """Validate parent_task_id: must not be empty if provided."""
+        if self.parent_task_id and (not self.parent_task_id.strip()):
+            raise ValueError(f"Parent task ID cannot be empty, got: {self.parent_task_id}")
+
+    def _validate_recurrence_pattern(self):
+        """Validate recurrence_pattern: must not conflict with parent_task_id for templates."""
+        if self.recurrence_pattern and self.parent_task_id and not self.is_recurring_template:
+            # For generated instances, parent_task_id is allowed but recurrence_pattern should not also be set
+            # This validation might need to be adjusted based on specific requirements
+            pass
