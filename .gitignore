@@ -34,4 +34,4 @@ env/
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.dbdebug_*.py
